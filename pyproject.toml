@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "tf2-visualizer"
+version = "1.0.0"
+description = "Real-time ROS 2 TF2 tree graph visualizer"
+requires-python = ">=3.10"
+dependencies = [
+    "PySide6>=6.5",
+]
+
+[project.scripts]
+tf2-visualizer = "tf2_visualizer.main:main"
+
+[tool.setuptools.packages.find]
+include = ["tf2_visualizer*"]
