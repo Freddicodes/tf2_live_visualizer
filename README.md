@@ -28,7 +28,7 @@ Real-time ROS 2 TF tree viewer with a Qt GUI. Subscribes to `/tf` and `/tf_stati
                             └──────────────┘
 ```
 
-The ROS subscriber thread writes edges into `TFGraph`. A monotonic revision counter is bumped on structural changes. The Qt timer polls this counter at ~60 fps and only rebuilds the scene when the revision has changed.
+The ROS subscriber thread writes edges into `TFGraph`.
 
 ## Prerequisites
 
@@ -79,16 +79,3 @@ ros2 run tf2_ros static_transform_publisher 0 0 0.3 0 0 0 base_link lidar_link
 ## Configuration
 
 Edit `TFGraph(stale_timeout=...)` in `main.py` to change how long dynamic edges persist after their last update (default 10 s).
-
-## File Structure
-
-```
-tf2_visualizer/
-├── __init__.py
-├── __main__.py        # python -m entry point
-├── main.py            # application bootstrap
-├── graph.py           # thread-safe TF tree data model
-├── layout.py          # Reingold-Tilford tree layout engine
-├── ros_listener.py    # ROS 2 /tf + /tf_static subscriber
-└── gui.py             # PySide6 Qt graphics view + window
-```
