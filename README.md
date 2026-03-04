@@ -79,3 +79,7 @@ ros2 run tf2_ros static_transform_publisher 0 0 0.3 0 0 0 base_link lidar_link
 ## Configuration
 
 Edit `TFGraph(stale_timeout=...)` in `main.py` to change how long dynamic edges persist after their last update (default 10 s).
+
+## AI use 
+
+This application was coded with AI as it is not intendet for serious use. It is intended for debugging / visualization.
