@@ -13,6 +13,7 @@ Real-time ROS 2 TF tree viewer with a Qt GUI. Subscribes to `/tf` and `/tf_stati
 - **Tooltips** — hover any node to see parent, translation, rotation, and static flag
 - **Stale pruning** — dynamic edges not seen for 10 s are automatically removed
 - **Thread-safe** — ROS callbacks run on a daemon thread; Qt main loop is never blocked
+- **Manual refresh** — click the ⟳ button to force an immediate scene rebuild
 
 ## Architecture
 
@@ -34,25 +35,21 @@ The ROS subscriber thread writes edges into `TFGraph`.
 
 ```bash
 # ROS 2 (Humble / Iron / Jazzy) must be sourced
-source /opt/ros/${ROS_DISTRO}/setup.bash
+source /opt/ros/${ROS_DISTRO}/setup.${SHELL##*/}
 
 # Python deps
 pip install PySide6
-```
-
-## Installation
-
-```bash
-python -m tf2_visualizer
 ```
 
 ## Usage
 
 ```bash
 # Terminal 1 — run the visualizer
-python -m tf2_visualizer
+colcon build --packages-select tf2_visualizer_pkg
+source install/setup.${SHELL##*/}
+ros2 run tf2_visualizer_pkg tf2_visualizer
 
-# Terminal 2 — publish some test transforms
+# Terminal 2 — publish some test transforms 
 ros2 run tf2_ros static_transform_publisher 0 0 1 0 0 0 world base_link
 ros2 run tf2_ros static_transform_publisher 0 0.5 0 0 0 0 base_link camera_link
 ros2 run tf2_ros static_transform_publisher 0 0 0.3 0 0 0 base_link lidar_link
