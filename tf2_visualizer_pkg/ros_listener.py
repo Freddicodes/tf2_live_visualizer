@@ -1,5 +1,5 @@
 """
-tf2_visualizer.ros_listener — ROS 2 subscriber for /tf and /tf_static.
+tf2_visualizer_pkg.ros_listener — ROS 2 subscriber for /tf and /tf_static.
 
 Runs the rclpy spin loop on a daemon thread so the GUI main loop is
 never blocked.
@@ -17,7 +17,7 @@ from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPo
 from tf2_msgs.msg import TFMessage
 
 if TYPE_CHECKING:
-    from tf2_visualizer.graph import TFGraph
+    from tf2_visualizer_pkg.graph import TFGraph
 
 
 # /tf_static uses transient-local durability so late-joining subscribers
@@ -45,10 +45,18 @@ class TFListenerNode(Node):
         self._graph = graph
 
         self.create_subscription(TFMessage, "/tf", self._on_tf, _QOS_TF)
-        self.create_subscription(TFMessage, "/tf_static", self._on_tf_static, _QOS_TF_STATIC)
+        self._static_sub = self.create_subscription(TFMessage, "/tf_static", self._on_tf_static, _QOS_TF_STATIC)
         self.get_logger().info("Subscribed to /tf and /tf_static")
 
     # ── callbacks ───────────────────────────────────────────────────
+
+    def force_refresh(self) -> None:
+        """Clear the graph and re-subscribe to /tf_static to replay static transforms."""
+        self._graph.clear()
+        self.destroy_subscription(self._static_sub)
+        self._static_sub = self.create_subscription(
+            TFMessage, "/tf_static", self._on_tf_static, _QOS_TF_STATIC
+        )
 
     def _on_tf(self, msg: TFMessage) -> None:
         self._ingest(msg, is_static=False)

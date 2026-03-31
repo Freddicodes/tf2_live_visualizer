@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Tuple
 
-from tf2_visualizer.graph import FrameEdge
+from tf2_visualizer_pkg.graph import FrameEdge
 
 
 @dataclass
@@ -26,13 +26,15 @@ class LayoutNode:
 @dataclass
 class GraphLayout:
     """Computed layout result."""
+
     nodes: Dict[str, Tuple[float, float]]  # name → (x, y)
-    edges: List[Tuple[str, str, bool]]      # (parent, child, is_static)
+    edges: List[Tuple[str, str, bool]]  # (parent, child, is_static)
     width: float
     height: float
 
 
 # ── public entry point ─────────────────────────────────────────────
+
 
 def compute_layout(
     edges: Dict[Tuple[str, str], FrameEdge],
@@ -56,7 +58,7 @@ def compute_layout(
     parents_set: Set[str] = set()
     children_set: Set[str] = set()
 
-    for (p, c) in edges:
+    for p, c in edges:
         children_map.setdefault(p, []).append(c)
         parents_set.add(p)
         children_set.add(c)

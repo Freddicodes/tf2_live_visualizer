@@ -1,12 +1,10 @@
 """
-tf2_visualizer.graph — Thread-safe TF tree data model.
+tf2_visualizer_pkg.graph — Thread-safe TF tree data model.
 
 Maintains the directed acyclic graph of TF frames. Every edge represents
 a transform from parent → child.  The model is designed for concurrent
 producer (ROS subscriber thread) / consumer (GUI thread) access.
 """
-
-from __future__ import annotations
 
 import threading
 import time
@@ -67,6 +65,12 @@ class TFGraph:
             self._edges[key] = new_edge
             if old is None:  # structural change
                 self._revision += 1
+
+    def clear(self) -> None:
+        """Remove all edges and bump revision (used by force-refresh)."""
+        with self._lock:
+            self._edges.clear()
+            self._revision += 1
 
     def prune_stale(self) -> int:
         """Remove dynamic edges older than *stale_timeout*.  Returns count removed."""

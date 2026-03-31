@@ -1,35 +1,27 @@
 #!/usr/bin/env python3
 """
-tf2_visualizer — Real-time ROS 2 TF tree graph viewer.
+tf2_visualizer_pkg — Real-time ROS 2 TF tree graph viewer.
 
 Subscribes to /tf and /tf_static, builds a live directed tree of frames,
 and renders it in a Qt window with pan, zoom, tooltips, and automatic
 layout updates.
 
-Usage
------
-    # Make sure your ROS 2 workspace is sourced
-    python -m tf2_visualizer            # or
-    python tf2_visualizer/main.py
-
 Architecture
 ------------
-    ┌──────────────────┐        ┌──────────────┐
-    │  ROS 2 spin      │──edge──▶   TFGraph    │
+    ┌──────────────────┐          ┌──────────────┐
+    │  ROS 2 spin      │──edge──▶ │ TFGraph      │
     │  (daemon thread) │  updates │ (thread-safe)│
-    └──────────────────┘        └──────┬───────┘
-                                       │ revision poll
-                                ┌──────▼───────┐
-                                │  Qt GUI      │
-                                │  (main thread)│
-                                └──────────────┘
+    └──────────────────┘          └──────┬───────┘
+                                         │ revision poll
+                                  ┌──────▼───────┐
+                                  │  Qt GUI      │
+                                  │ (main thread)│
+                                  └──────────────┘
 
 The ROS callback thread writes into TFGraph; the Qt main thread polls
 the graph revision counter every 16 ms and repaints only when the
 topology has changed.
 """
-
-from __future__ import annotations
 
 import signal
 import sys
@@ -37,9 +29,9 @@ import sys
 import rclpy
 from PySide6.QtWidgets import QApplication
 
-from tf2_visualizer.graph import TFGraph
-from tf2_visualizer.gui import TFVisualizerWindow
-from tf2_visualizer.ros_listener import ROSSpinThread, TFListenerNode
+from tf2_visualizer_pkg.graph import TFGraph
+from tf2_visualizer_pkg.gui import TFVisualizerWindow
+from tf2_visualizer_pkg.ros_listener import ROSSpinThread, TFListenerNode
 
 
 def main() -> None:
@@ -55,7 +47,7 @@ def main() -> None:
     app = QApplication(sys.argv)
     app.setApplicationName("TF2 Graph Visualizer")
 
-    window = TFVisualizerWindow(graph)
+    window = TFVisualizerWindow(graph, on_force_refresh=node.force_refresh)
     window.show()
 
     # Allow Ctrl-C to close gracefully

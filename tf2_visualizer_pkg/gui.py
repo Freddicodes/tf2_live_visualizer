@@ -1,5 +1,5 @@
 """
-tf2_visualizer.gui — Qt-based interactive TF tree viewer.
+tf2_visualizer_pkg.gui — Qt-based interactive TF tree viewer.
 
 Uses QGraphicsView / QGraphicsScene for smooth pan & zoom, and a
 QTimer to poll the TFGraph revision so the canvas repaints only when
@@ -32,11 +32,12 @@ from PySide6.QtWidgets import (
     QGraphicsView,
     QLabel,
     QMainWindow,
+    QPushButton,
     QStatusBar,
 )
 
-from tf2_visualizer.graph import FrameEdge, TFGraph
-from tf2_visualizer.layout import compute_layout
+from tf2_visualizer_pkg.graph import FrameEdge, TFGraph
+from tf2_visualizer_pkg.layout import compute_layout
 
 if TYPE_CHECKING:
     pass
@@ -252,9 +253,10 @@ class TFVisualizerWindow(QMainWindow):
     responsive — no signals cross the ROS / Qt thread boundary.
     """
 
-    def __init__(self, graph: TFGraph) -> None:
+    def __init__(self, graph: TFGraph, on_force_refresh=None) -> None:
         super().__init__()
         self._graph = graph
+        self._on_force_refresh = on_force_refresh
         self._last_rev: int = -1
 
         self.setWindowTitle("TF2 Graph Visualizer")
@@ -273,6 +275,17 @@ class TFVisualizerWindow(QMainWindow):
         self._status_label.setFont(_FONT)
         self._status_label.setStyleSheet(f"color: {_CLR_STATUS_TEXT.name()};")
         self._status.addWidget(self._status_label)
+
+        # Refresh Button
+        self._refresh_btn = QPushButton("⟳")
+        self._refresh_btn.setFont(_FONT_BOLD)
+        self._refresh_btn.setStyleSheet(
+            f"QPushButton {{ color: {_CLR_STATUS_TEXT.name()}; background: transparent; border: none; }}"
+            f"QPushButton:hover {{ color: {_CLR_NODE_BORDER.name()}; }}"
+        )
+        self._refresh_btn.setToolTip("Force refresh")
+        self._refresh_btn.clicked.connect(self._refresh)
+        self._status.addPermanentWidget(self._refresh_btn)
 
         # Legend
         self._legend_label = QLabel()
@@ -322,6 +335,13 @@ class TFVisualizerWindow(QMainWindow):
         )
 
     # ── polling / repaint ───────────────────────────────────────
+
+    def _refresh(self) -> None:
+        """Clear graph, re-fetch TF data, and rebuild the scene."""
+        if self._on_force_refresh:
+            self._on_force_refresh()
+        self._last_rev = -1
+        self._poll()
 
     def _poll(self) -> None:
         rev = self._graph.revision
